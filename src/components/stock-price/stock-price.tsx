@@ -9,10 +9,21 @@ import { Component } from "@stencil/core";
 export class StockPrice {
     @Element() el: HTMLElement;
     @State() stocks = [];
+    @State() stockUserInput: string;
+    @State() stockInputValid: boolean = false;
     stockInput: HTMLInputElement;
 
+    onUserInput(event: Event) {
+        this.stockUserInput = (event.target as HTMLInputElement).value;
+        if (this.stockUserInput.trim() !== '') {
+            this.stockInputValid = true;
+        } else {
+            this.stockInputValid = false;
+        }
+    }
+
     onFetchStockPrice(event: Event) {
-        console.log('stockInputValue', this.stockInput.value);
+        console.log('stockUserInput', this.stockUserInput);
         event.preventDefault();
         fetch('http://localhost:3000/stocks').then((response) => {
             response.json().then(data => {
@@ -29,8 +40,8 @@ export class StockPrice {
     render() {
         return [
             <form onSubmit={(event) => this.onFetchStockPrice(event)}>
-                <input type="text" id="stock-symbol" ref={el => this.stockInput = el} />
-                <button>Fetch</button>
+                <input type="text" id="stock-symbol" ref={el => this.stockInput = el} value={this.stockUserInput} onInput={(e) => this.onUserInput(e)} />
+                <button type="submit" disabled={!this.stockInputValid}>Fetch</button>
             </form>,
             <div>
                 <p>Stocks quantity: {this.stocks.length}</p>

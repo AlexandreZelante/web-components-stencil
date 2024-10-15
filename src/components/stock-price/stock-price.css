@@ -28,3 +28,10 @@ form button {
   background: #3b3b3b;
   cursor: pointer;
 }
+
+form button:disabled {
+  background-color: #ccc;
+  border-color: #ccc;
+  color: white;
+  cursor: not-allowed;
+}
