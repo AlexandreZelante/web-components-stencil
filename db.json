@@ -1,0 +1,14 @@
+{
+    "stocks": [
+        {
+            "id": 1,
+            "title": "ITAUSA",
+            "value": 200
+        },
+        {
+            "id": 2,
+            "title": "HGLG",
+            "values": 100
+        }
+    ]
+}
