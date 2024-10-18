@@ -1,4 +1,4 @@
-import { Element, h, State } from "@stencil/core";
+import { Element, h, Prop, State } from "@stencil/core";
 import { Component } from "@stencil/core";
 
 @Component({
@@ -11,6 +11,9 @@ export class StockPrice {
     @State() stocks = [];
     @State() stockUserInput: string;
     @State() stockInputValid: boolean = false;
+    @State() error: string;
+    @Prop() stockTitle: string;
+
     stockInput: HTMLInputElement;
 
     onUserInput(event: Event) {
@@ -22,19 +25,31 @@ export class StockPrice {
         }
     }
 
-    onFetchStockPrice(event: Event) {
+    async fetchStockPrice(title: string) {
+        const response = await fetch(`http://localhost:3000/stocks?title=${title}`)
+        return await response.json();
+    }
+
+    async onFetchStockPrice(event: Event) {
         console.log('stockUserInput', this.stockUserInput);
         event.preventDefault();
-        fetch('http://localhost:3000/stocks').then((response) => {
-            response.json().then(data => {
-                console.log(data);
+        this.error = null;
+        try {
+            const data = await this.fetchStockPrice(this.stockUserInput)
+            console.log(data);
 
-                // This refers to the context of the caller, in that case the context of the form
-                this.stocks = data;
-            })
-        }).catch(error => {
+            // "this" refers to the context of the caller, in that case the context of the form
+            this.stocks = data;
+        } catch (error) {
+            this.error = error.message;
             console.error(error);
-        })
+        }
+    }
+
+    componentWillLoad() {
+        if (this.stockTitle) {
+            this.fetchStockPrice(this.stockTitle).then(data => this.stocks = data);
+        }
     }
 
     render() {
@@ -45,10 +60,11 @@ export class StockPrice {
             </form>,
             <div>
                 <p>Stocks quantity: {this.stocks.length}</p>
-                {this.stocks.map(stock => (
+                {this.error && <p>Invalid stock</p>}
+                {!this.error && this.stocks.map(stock => (
                     <div id={stock.id}>
                         <h3>{stock.title}</h3>
-                        <p>Value: U$ {stock.author}</p>
+                        <p>Value: U$ {stock.value}</p>
                     </div>
                 ))}
             </div>
